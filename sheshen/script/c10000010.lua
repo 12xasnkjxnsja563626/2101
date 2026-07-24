@@ -50,11 +50,12 @@ function c10000010.initial_effect(c)
 	--destroy
 	local e7=Effect.CreateEffect(c)
 	e7:SetDescription(aux.Stringid(10000010,1))
-	e7:SetCategory(CATEGORY_DESTROY)
+	e7:SetCategory(CATEGORY_TOGRAVE)
 	e7:SetType(EFFECT_TYPE_QUICK_O)
 	e7:SetRange(LOCATION_MZONE)
 	e7:SetCode(EVENT_FREE_CHAIN)
-	e7:SetCountLimit(1)
+	e7:SetCountLimit(3)
+	e7:SetCondition(c10000010.descon)
 	e7:SetCost(c10000010.descost)
 	e7:SetTarget(c10000010.destg)
 	e7:SetOperation(c10000010.desop)
@@ -162,22 +163,25 @@ function c10000010.atkop(e,tp,eg,ep,ev,re,r,rp)
 		c:RegisterEffect(e2)
 	end
 end
+function c10000010.descon(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2
+end
 function c10000010.descost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckLPCost(tp,1000) end
 	Duel.PayLPCost(tp,1000)
 end
 function c10000010.destg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(aux.TRUE,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,0,0)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,0,0)
 	Duel.SetChainLimit(c10000010.chlimit)
 end
 function c10000010.chlimit(e,ep,tp)
 	return tp==ep
 end
 function c10000010.desop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectMatchingCard(tp,aux.TRUE,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-	Duel.Destroy(g,REASON_EFFECT)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToGrave,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	Duel.SendtoGrave(g,REASON_EFFECT)
 end
 function c10000010.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil) and (e:GetHandler():IsAbleToHand() or e:GetHandler():IsAbleToGrave()) end
