@@ -63,7 +63,7 @@ function c10000010.initial_effect(c)
 	--To hand
 	local e8=Effect.CreateEffect(c)
 	e8:SetDescription(aux.Stringid(10000010,6))
-	e8:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e8:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_TOGRAVE+CATEGORY_TODECK)
 	e8:SetType(EFFECT_TYPE_IGNITION)
 	e8:SetRange(LOCATION_DECK)
 	e8:SetCode(EVENT_FREE_CHAIN)
@@ -184,24 +184,27 @@ function c10000010.desop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.SendtoGrave(g,REASON_EFFECT)
 end
 function c10000010.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil) and (e:GetHandler():IsAbleToHand() or e:GetHandler():IsAbleToGrave()) end
+	if chk==0 then return e:GetHandler():IsAbleToHand() or e:GetHandler():IsAbleToGrave() end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,0,0)
 	Duel.SetChainLimit(c10000010.chlimit)
 end
 function c10000010.thop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local g=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,LOCATION_HAND,0,nil)
-	if g:GetCount()>0 then
-		local dg=g:RandomSelect(tp,1)
-		if Duel.SendtoDeck(dg,nil,2,REASON_EFFECT)>0 and c:IsRelateToEffect(e) then
-			local op=aux.SelectFromOptions(tp,{c:IsAbleToHand(),1190,1},{c:IsAbleToGrave(),1191,2})
-			if op==1 then
-				Duel.SendtoHand(c,nil,REASON_EFFECT)
-			elseif op==2 then
-				Duel.SendtoGrave(c,REASON_EFFECT)
-			end
+	if  c:IsRelateToEffect(e) then
+		local op=aux.SelectFromOptions(tp,{c:IsAbleToHand(),1190,1},{c:IsAbleToGrave(),1191,2})
+		if op==1 then
+			Duel.SendtoHand(c,nil,REASON_EFFECT)
+		elseif op==2 then
+			Duel.SendtoGrave(c,REASON_EFFECT)
 		end
-	end   
+		local og=Duel.GetOperatedGroup()
+		if og:GetCount()>0 and Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,nil) and Duel.SelectYesNo(tp,1193) then
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+			local g=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+			Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
+		end 
+	end  
 end
 function c10000010.immval(e,te)
 	local c=e:GetHandler()
