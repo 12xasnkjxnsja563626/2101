@@ -12,13 +12,26 @@ function c46668237.initial_effect(c)
 	e1:SetTarget(c46668237.target)
 	e1:SetOperation(c46668237.operation)
 	c:RegisterEffect(e1)
+	--spsummon(battle)
+	local e2=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(46668237,0))
+	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e2:SetRange(LOCATION_HAND+LOCATION_GRAVE)
+	e2:SetCode(EVENT_BATTLE_DESTROYED)
+	e2:SetCondition(c46668237.condition)
+	e2:SetCost(c46668237.cost)
+	e2:SetTarget(c46668237.target)
+	e2:SetOperation(c46668237.operation)
+	c:RegisterEffect(e2)
 end
 function c46668237.cfilter(c,tp)
 	return c:IsType(TYPE_MONSTER) and c:IsRace(RACE_BEAST) and c:IsPreviousControler(tp) and c:IsPreviousPosition(POS_FACEUP)
 		and c:IsPreviousLocation(LOCATION_MZONE) and bit.band(c:GetPreviousRaceOnField(),RACE_BEAST)~=0
 end
 function c46668237.condition(e,tp,eg,ep,ev,re,r,rp)
-	return not eg:IsContains(e:GetHandler()) and eg:IsExists(c46668237.cfilter,1,nil,tp) and bit.band(r,REASON_DESTROY)==REASON_DESTROY
+	return not eg:IsContains(e:GetHandler()) and eg:IsExists(c46668237.cfilter,1,nil,tp)
+		and (bit.band(r,REASON_DESTROY)==REASON_DESTROY or e:GetCode()==EVENT_BATTLE_DESTROYED)
 end
 function c46668237.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckLPCost(tp,1000) end
